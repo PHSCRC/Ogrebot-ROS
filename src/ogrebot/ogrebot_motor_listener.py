@@ -3,6 +3,8 @@ import odrive
 from odrive.enums import *
 import time
 import math
+import rospy
+from geometry_msgs.msg import Twist
 
 ROBOT_RADIUS = .12 #in meteres
 WHEEL_RADIUS = .08 # in meters
@@ -45,7 +47,7 @@ def listener():
     # name for our 'listener' node so that multiple listeners can
     # run simultaneously.
     rospy.init_node('listener', anonymous=False)
-    rospy.Subscriber("cmd_vel", Twist, callback)
+    rospy.Subscriber("/cmd_vel", Twist, callback)
     leftVel = rospy.Publisher('leftVel', float, queue_size=10)
     rightVel = rospy.Publisher('rightVel', float, queue_size=10)
     rospy.Timer(rospy.Duration(.01), poll, oneshot=False)
