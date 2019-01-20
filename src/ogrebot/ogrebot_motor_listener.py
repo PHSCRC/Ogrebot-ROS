@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 import odrive
 from odrive.enums import *
+
 import time
 import math
+
 import rospy
 from geometry_msgs.msg import Twist
 
 ROBOT_RADIUS = .12 #in meteres
 WHEEL_RADIUS = .08 # in meters
 ENCODER_COUNTS_PER_ROTATION = 4096
+
+POLL_TIME=0.01
 def callback(cmd_vel):
     print("linearx", cmd_vel.linear.x)
     print("angularz", cmd_vel.angular.z)
@@ -39,8 +43,6 @@ def listener():
     my_drive.axis1.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
     my_drive.axis1.controller.config.control_mode = CTRL_MODE_VELOCITY_CONTROL
 
-
-
     # In ROS, nodes are uniquely named. If two nodes with the same
     # name are launched, the previous one is kicked off. The
     # anonymous=True flag means that rospy will choose a unique
@@ -50,7 +52,7 @@ def listener():
     rospy.Subscriber("/cmd_vel", Twist, callback)
     leftVel = rospy.Publisher('leftVel', float, queue_size=10)
     rightVel = rospy.Publisher('rightVel', float, queue_size=10)
-    rospy.Timer(rospy.Duration(.01), poll, oneshot=False)
+    rospy.Timer(rospy.Duration(POLL_TIME), poll, oneshot=False)
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
 
