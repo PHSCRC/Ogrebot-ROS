@@ -7,6 +7,7 @@ import math
 
 import rospy
 from geometry_msgs.msg import Twist
+from ogrebot.msg import robot_vels
 
 ROBOT_RADIUS = .12 #in meteres
 WHEEL_RADIUS = .08 # in meters
@@ -27,9 +28,15 @@ def callback(cmd_vel):
 
 def poll(event):
     leftReading = my_drive.axis0.encoder.vel_estimate/ENCODER_COUNTS_PER_ROTATION
-    rightReading = my_drive.axis1.encoder.vel_estimate/ENCODER_COUNTS_PER_ROTATION
+    rightReading = my_drive.axis1.encoder.vel_estimate/ENCODER_COUNTS_PER_ROTATIONp
     leftVel.publish(leftReading)
     rightVel.publish(rightReading)
+    msg = robot_vels()
+    msg.left_vel = leftVel
+    msg.right_vel = rightVel
+    msg.POLL_TIME = .01
+    msg.ROBOT_RADIUS = ROBOT_RADIUS
+    vels.publish(msg)
 
 def listener():
     print("looking for odrive")
@@ -50,14 +57,12 @@ def listener():
     # run simultaneously.
     rospy.init_node('listener', anonymous=False)
     rospy.Subscriber("/cmd_vel", Twist, callback)
-    leftVel = rospy.Publisher('leftVel', float, queue_size=10)
-    rightVel = rospy.Publisher('rightVel', float, queue_size=10)
+    vels = rospy.Publisher('wheel_vels', robot_vels, queue_size=10)
     rospy.Timer(rospy.Duration(POLL_TIME), poll, oneshot=False)
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
 
 if __name__ == '__main__':
     my_drive = None
-    leftVel = None
-    rightVel = None
+    vels = None
     listener()
